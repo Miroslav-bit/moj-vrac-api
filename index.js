@@ -33,7 +33,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
     const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori sa DA ili NE i proceni verovatnoću: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.6,
       max_tokens: 150,
