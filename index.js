@@ -13,6 +13,11 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // ➤ OVDE UNESI SVOJ API KLJUČ
+if (!process.env.OPENAI_API_KEY) {
+  console.error("❌ OPENAI_API_KEY nije postavljen!");
+  process.exit(1);
+}
+
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY
 });
