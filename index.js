@@ -1,12 +1,16 @@
-const express = require("express");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const OpenAI = require("openai");
+import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import { OpenAI } from "openai";
 
 const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
+// Provera da li je postavljen API ključ
 if (!process.env.OPENAI_API_KEY) {
   console.error("❌ Nema postavljenog OpenAI API ključa.");
   process.exit(1);
@@ -26,7 +30,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori sa DA ili NE i proceni verovatnoću ostvarenja sledećeg pitanja: "${pitanje}"`;
+    const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori sa DA ili NE i proceni verovatnoću: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4",
@@ -38,13 +42,12 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
     const odgovor = completion.choices[0].message.content.trim();
     res.json({ odgovor });
   } catch (error) {
-    console.error("❌ Greška u OpenAI pozivu:", error);
+    console.error("Greška u OpenAI pozivu:", error);
     res.status(500).send("Greška u obradi zahteva.");
   }
 });
 
 // Pokretanje servera
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`✅ Server pokrenut na portu ${PORT}`);
+app.listen(port, () => {
+  console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
