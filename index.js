@@ -27,15 +27,9 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Korisnik će postaviti pitanje koje počinje sa \"Da li\", \"Da li će\", \"Da li će se\" ili \"Da li će biti\", a na koje je moguće odgovoriti sa DA ili NE.
+    const prompt = `Korisnik će postaviti pitanje koje počinje sa \"Da li ću\", \"Da li će\", \"Da li će se\" ili \"Da li ćemo\", a na koje je moguće odgovoriti sa DA ili NE.
 
-Na osnovu dostupnih informacija, statistike, logike i prethodnih obrazaca, proceni verovatnoću da je odgovor na to pitanje potvrdan (DA).
-
-Ako je procenjena verovatnoća veća od 50%, odgovori sa \"DA, verovatnoća X%\", gde je X procenjeni procenat.
-Ako je verovatnoća manja od 50%, odgovori sa \"NE, verovatnoća X%\".
-Ako je tačno 50%, odgovori ono što je logički konzervativnije (NE).
-
-Ne dodaj nikakva pojašnjenja ili dodatne komentare. Odgovor mora sadržati isključivo ove tri komponente, tačno ovim redosledom: DA/NE, reč \"verovatnoća\", i procenat u obliku broja sa simbolom %.
+Na osnovu dostupnih informacija, statistike, logike i prethodnih obrazaca, proceni verovatnoću da je odgovor na to pitanje potvrdan (DA), i izrazi je isključivo kao broj između 0 i 1 (decimalna vrednost). Ne dodaj nikakvo objašnjenje ni propratni tekst. Primer: 0.78
 
 Pitanje: \"${pitanje}\"`;
 
@@ -44,8 +38,7 @@ Pitanje: \"${pitanje}\"`;
       messages: [
         {
           role: "system",
-          content:
-            "Ti si analitički asistent koji daje precizne i logičke procene u formatu: DA ili NE, reč 'verovatnoća', i broj u procentima. Ne daješ nikakva dodatna objašnjenja.",
+          content: "Vrati samo verovatnoću kao decimalni broj između 0 i 1. Ništa drugo ne dodaj."
         },
         {
           role: "user",
@@ -53,11 +46,20 @@ Pitanje: \"${pitanje}\"`;
         },
       ],
       temperature: 0.3,
-      max_tokens: 50,
+      max_tokens: 10,
     });
 
-    const odgovor = completion.choices[0].message.content.trim();
-    res.json({ odgovor });
+    const raw = completion.choices[0].message.content.trim();
+    const verovatnoca = parseFloat(raw);
+
+    if (isNaN(verovatnoca)) {
+      return res.status(500).send("Nevalidan odgovor modela.");
+    }
+
+    const procenat = Math.round(verovatnoca * 100);
+    const odgovor = verovatnoca > 0.5 ? "DA" : "NE";
+
+    res.json({ odgovor: `${odgovor}, verovatnoća ${procenat}%` });
 
   } catch (error) {
     console.error("❌ Greška u OpenAI pozivu:", error);
@@ -68,3 +70,4 @@ Pitanje: \"${pitanje}\"`;
 app.listen(port, () => {
   console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
+
