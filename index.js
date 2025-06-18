@@ -27,10 +27,17 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Proceni istinitost sledećeg pitanja koristeći sve dostupne informacije, statistiku, logiku i verovatnoće. 
-Odgovori u sledećem formatu: DA ili NE, zatim reč "verovatnoća", i na kraju broj u procentima (bez dodatnog objašnjenja). 
+    const prompt = `Korisnik će postaviti pitanje koje počinje sa \"Da li\", \"Da li će\", \"Da li će se\" ili \"Da li će biti\", a na koje je moguće odgovoriti sa DA ili NE.
 
-Pitanje: "${pitanje}"`;
+Na osnovu dostupnih informacija, statistike, logike i prethodnih obrazaca, proceni verovatnoću da je odgovor na to pitanje potvrdan (DA).
+
+Ako je procenjena verovatnoća veća od 50%, odgovori sa \"DA, verovatnoća X%\", gde je X procenjeni procenat.
+Ako je verovatnoća manja od 50%, odgovori sa \"NE, verovatnoća X%\".
+Ako je tačno 50%, odgovori ono što je logički konzervativnije (NE).
+
+Ne dodaj nikakva pojašnjenja ili dodatne komentare. Odgovor mora sadržati isključivo ove tri komponente, tačno ovim redosledom: DA/NE, reč \"verovatnoća\", i procenat u obliku broja sa simbolom %.
+
+Pitanje: \"${pitanje}\"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
