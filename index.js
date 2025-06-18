@@ -30,7 +30,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike, iskustva i informacija dostupnih na internetu, odgovori samo sa DA ili NE, a u sledećem pasusu verovatnoću izrazi samo u procentima: "${pitanje}"`;
+    const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike, iskustva i informacija dostupnih na internetu, odgovori samo sa DA ili NE, a verovatnoću izrazi samo u procentima i nemoj davati nikakva dodatna pojašnjenja, odgovor treba da se sastoji iz tri reči, prvu reč čini odgovor DA ili NE, druga reč glasi - verovatnoća, i treća reč je brojka u procentima: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
