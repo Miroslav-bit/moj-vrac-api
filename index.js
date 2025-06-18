@@ -1,7 +1,8 @@
-import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import { OpenAI } from "openai";
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { OpenAI } = require("openai");
+require("dotenv").config(); // ako koristiš .env fajl
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -30,32 +31,31 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const userPrompt = `Proceni istinitost sledećeg pitanja koristeći sve dostupne informacije, statistiku, logiku i verovatnoće. 
-Odgovori u sledećem formatu: DA ili NE, zatim reč "verovatnoća:", i na kraju broj u procentima (bez dodatnog objašnjenja).
-
-Pitanje: "${pitanje}"`;
+    const prompt = `Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori sa DA ili NE i proceni verovatnoću: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "Ti si analitički asistent koji daje precizne i logičke procene u formatu: DA ili NE, reč 'verovatnoća:', i broj u procentima. Ne daješ nikakva dodatna objašnjenja.",
-        },
-        {
-          role: "user",
-          content: userPrompt,
-        },
-      ],
-      temperature: 0.3,
-      max_tokens: 50,
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.6,
+      max_tokens: 150,
     });
 
     const odgovor = completion.choices[0].message.content.trim();
     res.json({ odgovor });
   } catch (error) {
-    console.error("Greška u OpenAI pozivu:", error);
-    res.status(500).send("Greška u obradi zahteva.");
+    console.error("❌ Greška u OpenAI pozivu:");
+    if (error.response) {
+      console.error("Status:", error.response.status);
+      console.error("Data:", error.response.data);
+      res.status(500).send("Greška u OpenAI odgovoru: " + JSON.stringify(error.response.data));
+    } else {
+      console.error("Error:", error.message || error);
+      res.status(500).send("Greška u obradi zahteva: " + (error.message || error));
+    }
   }
+});
+
+// Pokretanje servera
+app.listen(port, () => {
+  console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
