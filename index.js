@@ -40,7 +40,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta.
+    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta. Odgovori na jeziku na kom je pitanje postavljeno.
 
 Pitanje: "${pitanje}"`;
 
