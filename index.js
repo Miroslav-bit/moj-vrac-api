@@ -2,27 +2,23 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { OpenAI } = require("openai");
-require("dotenv").config(); // ako koristiš .env fajl
+require("dotenv").config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Provera da li je postavljen API ključ
 if (!process.env.OPENAI_API_KEY) {
   console.error("❌ Nema postavljenog OpenAI API ključa.");
   process.exit(1);
 }
 
-// Inicijalizacija OpenAI klijenta
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// API ruta
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const pitanje = req.body.pitanje;
   const lang = req.body.lang || "sr";
@@ -35,7 +31,17 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const jezik = dozvoljeniJezici.includes(lang) ? lang : "sr";
 
   try {
-    const prompt = `Odgovori isključivo na jeziku "${jezik}". Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori sa DA ili NE i proceni verovatnoću: "${pitanje}"`;
+    const prompt = `
+VAŽNO: Odgovori tačno i isključivo na jeziku "${jezik}". Ne objašnjavaj ništa dodatno. Poštuj tačan format.
+
+Primer:
+Odgovor: DA
+Verovatnoća: 72%
+
+Na osnovu analize svih poznatih podataka, statistike, logike i iskustva, odgovori na sledeće pitanje u gornjem formatu:
+
+"${pitanje}"
+`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -59,7 +65,6 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 });
 
-// Pokretanje servera
 app.listen(port, () => {
   console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
