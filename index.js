@@ -19,19 +19,30 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Mapa prevoda
+const prevodiOdgovora = {
+  sr: { da: "DA", ne: "NE", verovatnoca: "verovatnoća" },
+  en: { da: "YES", ne: "NO", verovatnoca: "probability" },
+  es: { da: "SÍ", ne: "NO", verovatnoca: "probabilidad" },
+  fr: { da: "OUI", ne: "NON", verovatnoca: "probabilité" },
+  de: { da: "JA", ne: "NEIN", verovatnoca: "Wahrscheinlichkeit" },
+  pt: { da: "SIM", ne: "NÃO", verovatnoca: "probabilidade" },
+  it: { da: "SÌ", ne: "NO", verovatnoca: "probabilità" },
+  ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" }
+};
+
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const pitanje = req.body.pitanje;
+  const jezik = req.body.jezik || "sr"; // podrazumevani jezik
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
   }
 
   try {
-    const prompt = `Korisnik će postaviti pitanje koje počinje sa \"Da li ću\", \"Da li će\", \"Da li će se\" ili \"Da li ćemo\", a na koje je moguće odgovoriti sa DA ili NE.
+    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta.
 
-Na osnovu dostupnih informacija, statistike, logike i prethodnih obrazaca, proceni verovatnoću da je odgovor na to pitanje potvrdan (DA), i izrazi je isključivo kao broj između 0 i 1 (decimalna vrednost). Ne dodaj nikakvo objašnjenje ni propratni tekst. Primer: 0.78
-
-Pitanje: \"${pitanje}\"`;
+Pitanje: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -57,9 +68,12 @@ Pitanje: \"${pitanje}\"`;
     }
 
     const procenat = Math.round(verovatnoca * 100);
-    const odgovor = verovatnoca > 0.5 ? "DA" : "NE";
+    const odgovorDaNe = verovatnoca > 0.5
+      ? (prevodiOdgovora[jezik]?.da || "DA")
+      : (prevodiOdgovora[jezik]?.ne || "NE");
+    const recVerovatnoca = prevodiOdgovora[jezik]?.verovatnoca || "verovatnoća";
 
-    res.json({ odgovor: `${odgovor}, verovatnoća ${procenat}%` });
+    res.json({ odgovor: `${odgovorDaNe}, ${recVerovatnoca} ${procenat}%` });
 
   } catch (error) {
     console.error("❌ Greška u OpenAI pozivu:", error);
