@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -19,20 +20,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Mapa prevoda
 const prevodiOdgovora = {
   sr: { da: "DA", ne: "NE", verovatnoca: "verovatnoća" },
   en: { da: "YES", ne: "NO", verovatnoca: "probability" },
   es: { da: "SÍ", ne: "NO", verovatnoca: "probabilidad" },
   fr: { da: "OUI", ne: "NON", verovatnoca: "probabilité" },
   de: { da: "JA", ne: "NEIN", verovatnoca: "Wahrscheinlichkeit" },
-  pt: { da: "SIM", ne: "NÃO", verovatnoca: "probabilidade" },
   it: { da: "SÌ", ne: "NO", verovatnoca: "probabilità" },
-  ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" }
+  pt: { da: "SIM", ne: "NÃO", verovatnoca: "probabilidade" },
+  ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" },
 };
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
-  const jezik = req.body.jezik || "sr";
+  const jezik = req.body.lang || "sr";
   const pitanje = req.body.pitanje;
 
   if (!pitanje || pitanje.trim() === "") {
@@ -49,8 +49,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
         jezik === 'de' ? 'JA' :
         jezik === 'it' ? 'SÌ' :
         jezik === 'pt' ? 'SIM' :
-        jezik === 'ru' ? 'ДА' :
-        'DA'
+        jezik === 'ru' ? 'ДА' : 'DA'
       } ili ${
         jezik === 'en' ? 'NO' :
         jezik === 'es' ? 'NO' :
@@ -58,8 +57,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
         jezik === 'de' ? 'NEIN' :
         jezik === 'it' ? 'NO' :
         jezik === 'pt' ? 'NÃO' :
-        jezik === 'ru' ? 'НЕТ' :
-        'NE'
+        jezik === 'ru' ? 'НЕТ' : 'NE'
       }, praćenom procentom verovatnoće (npr. "YES 73%").`
     };
 
@@ -73,18 +71,18 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
         }
       ],
       temperature: 0.3,
-      max_tokens: 10,
+      max_tokens: 20,
     });
 
     const raw = completion.choices[0].message.content.trim();
-    const verovatnoca = parseFloat(raw);
+    const matches = raw.match(/^([^\d\s]+)\s+(\d{1,3})%$/);
 
-    if (isNaN(verovatnoca)) {
-      return res.status(500).send("Nevalidan odgovor modela.");
+    if (!matches) {
+      return res.status(500).send("Nevalidan format odgovora.");
     }
 
-    const procenat = Math.round(verovatnoca * 100);
-    const odgovorDaNe = verovatnoca > 0.5
+    const procenat = parseInt(matches[2]);
+    const odgovorDaNe = procenat > 50
       ? (prevodiOdgovora[jezik]?.da || "DA")
       : (prevodiOdgovora[jezik]?.ne || "NE");
     const recVerovatnoca = prevodiOdgovora[jezik]?.verovatnoca || "verovatnoća";
@@ -98,5 +96,5 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🔮 Vrač server aktivan na portu ${port}`);
+  console.log(`🚀 Server aktivan na portu ${port}`);
 });
