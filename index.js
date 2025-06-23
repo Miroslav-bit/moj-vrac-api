@@ -33,13 +33,14 @@ const prevodiOdgovora = {
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const jezik = req.body.jezik || "sr";
+  const pitanje = req.body.pitanje;
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
   }
 
   try {
-    bconst systemPrompt = {
+    const systemPrompt = {
       role: "system",
       content: `Na osnovu analize svih dostupnih podataka, statistike, logike i iskustva, proceni verovatnoću da će se ishod iz pitanja ostvariti. Odgovaraj isključivo rečju ${
         jezik === 'en' ? 'YES' :
@@ -62,17 +63,15 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
       }, praćenom procentom verovatnoće (npr. "YES 73%").`
     };
 
-Pitanje: "${pitanje}"`;
-
-  const completion = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      systemPrompt,
-      {
-        role: "user",
-        content: pitanje
-      }
-    ],      
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        systemPrompt,
+        {
+          role: "user",
+          content: pitanje
+        }
+      ],
       temperature: 0.3,
       max_tokens: 10,
     });
