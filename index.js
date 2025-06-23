@@ -32,30 +32,47 @@ const prevodiOdgovora = {
 };
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
-  const pitanje = req.body.pitanje;
-  const jezik = req.body.jezik || "sr"; // podrazumevani jezik
+  const jezik = req.body.jezik || "sr";
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
   }
 
   try {
-    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta. Odgovori na jeziku na kom je pitanje postavljeno.
+    bconst systemPrompt = {
+      role: "system",
+      content: `Na osnovu analize svih dostupnih podataka, statistike, logike i iskustva, proceni verovatnoću da će se ishod iz pitanja ostvariti. Odgovaraj isključivo rečju ${
+        jezik === 'en' ? 'YES' :
+        jezik === 'es' ? 'SÍ' :
+        jezik === 'fr' ? 'OUI' :
+        jezik === 'de' ? 'JA' :
+        jezik === 'it' ? 'SÌ' :
+        jezik === 'pt' ? 'SIM' :
+        jezik === 'ru' ? 'ДА' :
+        'DA'
+      } ili ${
+        jezik === 'en' ? 'NO' :
+        jezik === 'es' ? 'NO' :
+        jezik === 'fr' ? 'NON' :
+        jezik === 'de' ? 'NEIN' :
+        jezik === 'it' ? 'NO' :
+        jezik === 'pt' ? 'NÃO' :
+        jezik === 'ru' ? 'НЕТ' :
+        'NE'
+      }, praćenom procentom verovatnoće (npr. "YES 73%").`
+    };
 
 Pitanje: "${pitanje}"`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "Vrati samo verovatnoću kao decimalni broj između 0 i 1. Ništa drugo ne dodaj."
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+  const completion = await openai.chat.completions.create({
+    model: "gpt-3.5-turbo",
+    messages: [
+      systemPrompt,
+      {
+        role: "user",
+        content: pitanje
+      }
+    ],      
       temperature: 0.3,
       max_tokens: 10,
     });
