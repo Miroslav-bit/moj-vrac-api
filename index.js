@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -20,69 +19,56 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Mapa prevoda
 const prevodiOdgovora = {
   sr: { da: "DA", ne: "NE", verovatnoca: "verovatnoća" },
   en: { da: "YES", ne: "NO", verovatnoca: "probability" },
   es: { da: "SÍ", ne: "NO", verovatnoca: "probabilidad" },
   fr: { da: "OUI", ne: "NON", verovatnoca: "probabilité" },
   de: { da: "JA", ne: "NEIN", verovatnoca: "Wahrscheinlichkeit" },
-  it: { da: "SÌ", ne: "NO", verovatnoca: "probabilità" },
   pt: { da: "SIM", ne: "NÃO", verovatnoca: "probabilidade" },
-  ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" },
+  it: { da: "SÌ", ne: "NO", verovatnoca: "probabilità" },
+  ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" }
 };
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
-  const jezik = req.body.lang || "sr";
   const pitanje = req.body.pitanje;
+  const jezik = req.body.jezik || "sr"; // podrazumevani jezik
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
   }
 
   try {
-    const systemPrompt = {
-      role: "system",
-      content: `Na osnovu analize svih dostupnih podataka, statistike, logike i iskustva, proceni verovatnoću da će se ishod iz pitanja ostvariti. Odgovaraj isključivo rečju ${
-        jezik === 'en' ? 'YES' :
-        jezik === 'es' ? 'SÍ' :
-        jezik === 'fr' ? 'OUI' :
-        jezik === 'de' ? 'JA' :
-        jezik === 'it' ? 'SÌ' :
-        jezik === 'pt' ? 'SIM' :
-        jezik === 'ru' ? 'ДА' : 'DA'
-      } ili ${
-        jezik === 'en' ? 'NO' :
-        jezik === 'es' ? 'NO' :
-        jezik === 'fr' ? 'NON' :
-        jezik === 'de' ? 'NEIN' :
-        jezik === 'it' ? 'NO' :
-        jezik === 'pt' ? 'NÃO' :
-        jezik === 'ru' ? 'НЕТ' : 'NE'
-      }, praćenom procentom verovatnoće (npr. "YES 73%").`
-    };
+    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta. Odgovori na jeziku na kom je pitanje postavljeno.
+
+Pitanje: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        systemPrompt,
+        {
+          role: "system",
+          content: "Vrati samo verovatnoću kao decimalni broj između 0 i 1. Ništa drugo ne dodaj."
+        },
         {
           role: "user",
-          content: pitanje
-        }
+          content: prompt,
+        },
       ],
       temperature: 0.3,
-      max_tokens: 20,
+      max_tokens: 10,
     });
 
     const raw = completion.choices[0].message.content.trim();
-    const matches = raw.match(/^([^\d\s]+)\s+(\d{1,3})%$/);
+    const verovatnoca = parseFloat(raw);
 
-    if (!matches) {
-      return res.status(500).send("Nevalidan format odgovora.");
+    if (isNaN(verovatnoca)) {
+      return res.status(500).send("Nevalidan odgovor modela.");
     }
 
-    const procenat = parseInt(matches[2]);
-    const odgovorDaNe = procenat > 50
+    const procenat = Math.round(verovatnoca * 100);
+    const odgovorDaNe = verovatnoca > 0.5
       ? (prevodiOdgovora[jezik]?.da || "DA")
       : (prevodiOdgovora[jezik]?.ne || "NE");
     const recVerovatnoca = prevodiOdgovora[jezik]?.verovatnoca || "verovatnoća";
@@ -96,5 +82,5 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Server aktivan na portu ${port}`);
+  console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
