@@ -19,40 +19,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function proveriValidnostPitanja(pitanje) {
-  const promptValidacija = `
-Tvoj zadatak je da proveriš da li je korisnička rečenica (napisana na jednom od 8 podržanih jezika) ispravno formulisano pitanje koje:
-
-1. Jeste upitna rečenica (postavlja pitanje),
-2. Odnosi se na budućnost (odnosi se na nešto što se još nije dogodilo),
-3. Može se odgovoriti sa „DA“ ili „NE“.
-
-Odgovori isključivo jednom rečju:
-- „VALIDNO“ ako su sva tri uslova ispunjena,
-- „NEVALIDNO“ u suprotnom.
-
-Korisničko pitanje: "${pitanje}"`;
-
-  const odgovor = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
-    messages: [
-      {
-        role: "system",
-        content: "Vrati samo jednu reč: VALIDNO ili NEVALIDNO."
-      },
-      {
-        role: "user",
-        content: promptValidacija,
-      },
-    ],
-    temperature: 0,
-    max_tokens: 10,
-  });
-
-  const rezultat = odgovor.choices[0].message.content.trim().toUpperCase();
-  return rezultat === "VALIDNO";
-}
-
 const prevodiOdgovora = {
   sr: { da: "DA", ne: "NE", verovatnoca: "verovatnoća" },
   en: { da: "YES", ne: "NO", verovatnoca: "probability" },
@@ -70,13 +36,6 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
-  }
-
-  const validno = await proveriValidnostPitanja(pitanje);
-  if (!validno) {
-    return res.status(400).json({
-      poruka: "Pitanje nije pravilno formulisano. Postavite pitanje koje se odnosi na budućnost i na koje se može odgovoriti sa DA ili NE."
-    });
   }
 
   try {
@@ -124,3 +83,22 @@ Pitanje: "${pitanje}"`;
 app.listen(port, () => {
   console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
+
+
+PACKAGE.JSON 
+
+{
+  "name": "vrac-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "body-parser": "^1.20.2",
+    "openai": "^4.0.0",
+    "dotenv": "^16.4.5"
+  }
+}
