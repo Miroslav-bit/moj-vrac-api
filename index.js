@@ -19,7 +19,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Mapa prevoda
 const prevodiOdgovora = {
   sr: { da: "DA", ne: "NE", verovatnoca: "verovatnoća" },
   en: { da: "YES", ne: "NO", verovatnoca: "probability" },
@@ -33,7 +32,7 @@ const prevodiOdgovora = {
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const pitanje = req.body.pitanje;
-  const jezik = req.body.jezik || "sr"; // podrazumevani jezik
+  const jezik = req.body.jezik || "en";
 
   if (!pitanje || pitanje.trim() === "") {
     return res.status(400).send("Pitanje je obavezno.");
