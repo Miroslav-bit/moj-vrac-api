@@ -46,7 +46,7 @@ Korisničko pitanje: "${pitanje}"`;
       },
     ],
     temperature: 0.7,
-    max_tokens: 10,
+    max_tokens: 100,
   });
 
   const rezultat = odgovor.choices[0].message.content.trim().toUpperCase();
@@ -104,8 +104,8 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
           content: prompt,
         },
       ],
-      temperature: 0.3,
-      max_tokens: 10,
+      temperature: 0.7,
+      max_tokens: 100,
     });
 
     const raw = completion.choices[0].message.content.trim();
