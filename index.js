@@ -45,7 +45,7 @@ Korisničko pitanje: "${pitanje}"`;
         content: promptValidacija,
       },
     ],
-    temperature: 0,
+    temperature: 0.3,
     max_tokens: 10,
   });
 
