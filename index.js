@@ -45,7 +45,7 @@ Korisničko pitanje: "${pitanje}"`;
         content: promptValidacija,
       },
     ],
-    temperature: 0.3,
+    temperature: 0.7,
     max_tokens: 10,
   });
 
@@ -80,9 +80,17 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
   try {
-    const prompt = `Na osnovu pitanja odgovori SAMO decimalnim brojem između 0 i 1 koji predstavlja verovatnoću da je odgovor DA. Bez objašnjenja. Bez propratnog teksta. Odgovori na jeziku na kom je pitanje postavljeno.
+    const prompt = `Ti si stručni sistem za predviđanje koji koristi proverene izvore znanja, naučne činjenice, statističke podatke, zakonitosti različitih oblasti (fizike, biologije, psihologije, prava, politike, ekonomije, umetnosti itd.), kao i logiku i zdrav razum.
 
-Pitanje: "${pitanje}"`;
+    Na osnovu korisničkog pitanja, proceni verovatnoću da će se navedeni događaj zaista dogoditi, i to isključivo kao decimalni broj između 0 i 1, gde 1 znači potpuna sigurnost da će se desiti.
+
+    Ako korisnik nije pružio dovoljno konkretnih informacija (na primer: starost, mesto, stanje, brojke itd.), tada proceni verovatnoću na osnovu sopstvene baze znanja i poznate statistike, primenjujući podatke za prosečnu osobu, prosečnu situaciju ili globalne proseke. U tom slučaju koristi logiku, demografske podatke i opštepoznate verovatnoće koje model sadrži.
+
+    Ne dodaj objašnjenje. Ne nagađaj bez osnova. Ako nema podataka, koristi znanje koje već imaš.
+
+    U odgovoru NAPIŠI ISKLJUČIVO decimalni broj. Ništa drugo.
+
+    Pitanje: "${pitanje}"`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
