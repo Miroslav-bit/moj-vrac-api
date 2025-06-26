@@ -21,15 +21,15 @@ const openai = new OpenAI({
 
 async function proveriValidnostPitanja(pitanje) {
   const promptValidacija = `
-Tvoj zadatak je da proveriš da li je korisnička rečenica (napisana na jednom od 8 podržanih jezika) ispravno formulisano pitanje koje:
+Your task is to check whether the user's sentence (written in one of the 8 supported languages) is a properly formulated question that:
 
-1. Jeste upitna rečenica (postavlja pitanje),
-2. Odnosi se na budućnost (odnosi se na nešto što se još nije dogodilo),
-3. Može se odgovoriti sa „DA“ ili „NE“.
+1. Is an interrogative sentence (asks a question),
+2. Refers to the future (something that has not happened yet),
+3. Can be answered with 'YES' or 'NO'.
 
-Odgovori isključivo jednom rečju:
-- „VALIDNO“ ako su sva tri uslova ispunjena,
-- „NEVALIDNO“ u suprotnom.
+Respond with a single word only:
+- „VALIDNO“ if all three conditions are met,
+- „NEVALIDNO“ otherwise.
 
 Korisničko pitanje: "${pitanje}"`;
 
@@ -38,7 +38,7 @@ Korisničko pitanje: "${pitanje}"`;
     messages: [
       {
         role: "system",
-        content: "Vrati samo jednu reč: VALIDNO ili NEVALIDNO."
+        content: "Return only one word: VALIDNO or NEVALIDNO."
       },
       {
         role: "user",
@@ -75,7 +75,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   const validno = await proveriValidnostPitanja(pitanje);
   if (!validno) {
     return res.status(400).json({
-      poruka: "Pitanje nije pravilno formulisano. Postavite pitanje koje se odnosi na budućnost i na koje se može odgovoriti sa DA ili NE."
+      poruka: "The question is not properly formulated. Please ask a question that refers to the future and can be answered with YES or NO."
     });
   }
 
@@ -113,7 +113,7 @@ Your response must be a single **decimal number between 0 and 1** that represent
       messages: [
         {
           role: "system",
-          content: "Vrati samo verovatnoću kao decimalni broj između 0 i 1. Ništa drugo ne dodaj."
+          content: "Return only the probability as a decimal number between 0 and 1. Do not add anything else."
         },
         {
           role: "user",
@@ -128,7 +128,7 @@ Your response must be a single **decimal number between 0 and 1** that represent
     const verovatnoca = parseFloat(raw);
 
     if (isNaN(verovatnoca)) {
-      return res.status(500).send("Nevalidan odgovor modela.");
+      return res.status(500).send("Invalid model response.");
     }
 
     const procenat = Math.round(verovatnoca * 100);
@@ -140,11 +140,12 @@ Your response must be a single **decimal number between 0 and 1** that represent
     res.json({ odgovor: `${odgovorDaNe}, ${recVerovatnoca} ${procenat}%` });
 
   } catch (error) {
-    console.error("❌ Greška u OpenAI pozivu:", error);
-    res.status(500).send("Greška u obradi zahteva.");
+    console.error("❌Error in OpenAI call:", error);
+    res.status(500).send("Request processing error.");
   }
 });
 
 app.listen(port, () => {
   console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
+
