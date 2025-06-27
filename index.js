@@ -72,7 +72,8 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
     return res.status(400).send("Pitanje je obavezno.");
   }
 
-  const validno = await proveriValidnostPitanja(pitanje);
+const pitanjeTekst = pitanje.split("Pitanje:").pop().trim();
+const validno = await proveriValidnostPitanja(pitanjeTekst);
   if (!validno) {
     return res.status(400).json({
       poruka: "The question is not properly formulated. Please ask a question that refers to the future and can be answered with YES or NO."
@@ -148,4 +149,3 @@ Your response must be a single **decimal number between 0 and 1** that represent
 app.listen(port, () => {
   console.log(`🔮 Vrač server aktivan na portu ${port}`);
 });
-
