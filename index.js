@@ -63,7 +63,7 @@ const prevodiOdgovora = {
   it: { da: "SÌ", ne: "NO", verovatnoca: "probabilità" },
   ru: { da: "ДА", ne: "НЕТ", verovatnoca: "вероятность" },
   pl: { da: "TAK", ne: "NIE", verovatnoca: "prawdopodobieństwo" },
-  uk: { da: "ТАК", ne: "НІ", verovatnoca: "ймовірність" }
+  uk: { da: "ТАК", ne: "НІ", verovatnoca: "ймовірність" },
   tr: { da: "EVET", ne: "HAYIR", verovatnoca: "ймовірність" }
 };
 
