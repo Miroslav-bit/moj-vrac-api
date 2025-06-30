@@ -68,6 +68,7 @@ const prevodiOdgovora = {
   ar: { da: "نعم", ne: "لا", verovatnoca: "الاحتمال" },
   hi: { da: "हाँ", ne: "नहीं", verovatnoca: "संभाव्यता" },
   zh: { da: "是", ne: "否", verovatnoca: "概率" },
+  ja: { da: "はい", ne: "いいえ", verovatnoca: "確率" },
 };
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
