@@ -78,7 +78,7 @@ app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
   }
 
 const pitanjeTekst = pitanje.split("Pitanje:").pop().trim();
-const validno = await proveriValidnostPitanja(pitanjeTekst);
+const validno = await proveriValidnostPitanja(pitanjeTekst, jezik);
   if (!validno) {
     return res.status(400).json({
       poruka: "The question is not properly formulated. Please ask a question that refers to the future and can be answered with YES or NO."
