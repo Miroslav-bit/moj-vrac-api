@@ -19,19 +19,19 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function proveriValidnostPitanja(pitanje) {
+async function proveriValidnostPitanja(pitanje, jezik = "en") {
   const promptValidacija = `
-Your task is to check whether the user's sentence (written in one of the 8 supported languages) is a properly formulated question that:
+Your task is to check whether the following sentence (written in ${jezik}) is a properly formulated question that:
 
 1. Is an interrogative sentence (asks a question),
 2. Refers to the future (something that has not happened yet),
 3. Can be answered with 'YES' or 'NO'.
 
-Respond with a single word only:
-- „VALIDNO“ if all three conditions are met,
-- „NEVALIDNO“ otherwise.
+Respond only with:
+- VALIDNO (if all 3 conditions are met),
+- NEVALIDNO (otherwise).
 
-Korisničko pitanje: "${pitanje}"`;
+Question (in ${jezik}): "${pitanje}"`;
 
   const odgovor = await openai.chat.completions.create({
     model: "gpt-3.5-turbo",
