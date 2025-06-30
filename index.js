@@ -66,6 +66,7 @@ const prevodiOdgovora = {
   uk: { da: "ТАК", ne: "НІ", verovatnoca: "ймовірність" },
   tr: { da: "EVET", ne: "HAYIR", verovatnoca: "Olasılık" },
   ar: { da: "نعم", ne: "لا", verovatnoca: "الاحتمال" }
+  hi: { da: "हाँ", ne: "नहीं", verovatnoca: "संभाव्यता" }
 };
 
 app.post("/api/v1/da-li-ce-se-desiti", async (req, res) => {
